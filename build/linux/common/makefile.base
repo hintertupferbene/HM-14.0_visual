@@ -47,7 +47,8 @@ endif
 
 # default cpp flags for all configurations
 #CPPFLAGS          = -Wall -fPIC $(DEFS) -I$(CURDIR)/$(INC_DIR) $(USER_INC_DIRS)
-CPPFLAGS          = -fPIC $(DEFS) -I$(CURDIR)/$(INC_DIR) $(USER_INC_DIRS) -Wall -Wshadow -Wno-sign-compare -Werror
+# CPPFLAGS          = -fPIC $(DEFS) -I$(CURDIR)/$(INC_DIR) $(USER_INC_DIRS) -Wall -Wshadow -Wno-sign-compare -Werror
+CPPFLAGS          = -fPIC $(DEFS) -I$(CURDIR)/$(INC_DIR) $(USER_INC_DIRS) -Wall -Wno-sign-compare -Wno-unused-variable
 
 ########## 
 # enforce 32-bit build : 1=yes, 0=no
@@ -86,7 +87,7 @@ RELEASE_ASMFLAGS  =
 #########################################################
 
 # linker flags for all
-ALL_LDFLAGS       = -Wall
+ALL_LDFLAGS       = -Wall -I /usr/include/opencv2 -L /usr/lib64 -lm -lopencv_core -lopencv_highgui -lopencv_imgproc
 
 ########## 
 # enforce 32-bit build : 1=yes, 0=no

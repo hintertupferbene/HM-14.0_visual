@@ -37,6 +37,13 @@
 
 #include "TDecSlice.h"
 
+#include "../../../visualize/Defines.h"
+#include "../../../visualize/CShow_ModesAndVectors.h"
+//#include "../../../visualize/CShow_TransformUnits.h"
+//#include "../../../visualize/CShow_RefIndices.h"
+//#include "../../../visualize/CShow_BitsCostDistortion.h"
+//#include "../../../visualize/CShow_Residual.h" // don't include, will not work
+
 //! \ingroup TLibDecoder
 //! \{
 
@@ -376,7 +383,23 @@ Void TDecSlice::decompressSlice(TComInputBitstream** ppcSubstreams, TComPic*& rp
       CTXMem[0]->loadContexts( pcSbacDecoder );//ctx end of dep.slice
       return;
     }
-  }
+  } // end loop over CTUs
+  
+#ifdef ACTIVATE_CSHOW_CLASSES
+  char VizFile[500];
+  
+  int NumCTBs = rpcPic->getNumCUsInFrame();
+  cout << endl << "Processing " << NumCTBs << " CTBs:" << endl;
+  
+  CShow_ModesAndVectors(rpcPic, NumCTBs, VizFile);
+  //CShow_TransformUnits(rpcPic, NumCTBs, VizFile);
+  //CShow_RefIndices(rpcPic, NumCTBs, VizFile);
+  //CShow_BitsCostDistortion Show_BitsCostDistortion(rpcPic, NumCTBs, VizFile);
+  //int Zoom = Show_BitsCostDistortion.Zoom;
+  //Mat Img = Show_BitsCostDistortion.Img(Rect(0, 0, DIMX*Zoom, DIMY*Zoom));
+  //Show_Residual.finalize(VizFile, Img.clone());
+#endif
+
 }
 
 ParameterSetManagerDecoder::ParameterSetManagerDecoder()
