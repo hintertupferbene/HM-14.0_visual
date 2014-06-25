@@ -391,7 +391,7 @@ Void TDecSlice::decompressSlice(TComInputBitstream** ppcSubstreams, TComPic*& rp
   int NumCTBs = rpcPic->getNumCUsInFrame();
   cout << endl << "Processing " << NumCTBs << " CTBs:" << endl;
   
-  CShow_ModesAndVectors(rpcPic, NumCTBs, VizFile);
+  CShow_ModesAndVectors(rpcPic, NumCTBs, VizFile, pcSlice->getSPS()->getMaxCUWidth());
   //CShow_TransformUnits(rpcPic, NumCTBs, VizFile);
   //CShow_RefIndices(rpcPic, NumCTBs, VizFile);
   //CShow_BitsCostDistortion Show_BitsCostDistortion(rpcPic, NumCTBs, VizFile);
