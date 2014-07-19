@@ -329,6 +329,8 @@ public:
         CB_Roi = RED;
       else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER && pcCU->isSkipped(uiAbsZorderIdx))
         CB_Roi = GREEN;
+      else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER && pcCU->getMergeFlag(uiAbsZorderIdx))
+              CB_Roi = YELLOW;
       else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER)
         CB_Roi = BLUE;
       else
