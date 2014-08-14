@@ -127,7 +127,8 @@ public:
 //      line(CTB_Roi, Point(CTBSize*Zoom-1,CTBSize*Zoom-1), Point(CTBSize*Zoom-1, 0), YELLOW, 10);//right
 //      line(CTB_Roi, Point(CTBSize*Zoom-1,CTBSize*Zoom-1), Point(0, CTBSize*Zoom-1), YELLOW, 10);//right
       sprintf(text, "%d", LCU_Index);
-      helpme::writeText(CTB_Roi, text, YELLOW, Point(7,7), 1.0);
+      //helpme::writeText(CTB_Roi, text, YELLOW, Point(7,7), 1.0);
+      helpme::writeText(CTB_Roi, text, BLACK, Point(7,7), 1.0);
     }
     //---------------------------------------------
     //---------------------------------------------
