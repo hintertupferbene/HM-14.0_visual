@@ -148,7 +148,8 @@ public:
     	  S = *it1;
     	  E = *it2;
     	  int LineSize = 2;
-    	  line(Img, S, E, GREEN_2, LineSize, CV_AA); //top
+    	  //line(Img, S, E, GREEN_2, LineSize, CV_AA); //top
+    	  line(Img, S, E, RED, LineSize, CV_AA); //top
 
           double angle;                                                                           // Draws the spin of the arrow
           angle = atan2( (double) S.y - E.y, (double) S.x - E.x );
@@ -156,11 +157,13 @@ public:
           double spinSize = 15;
           S.x = (int) (E.x + spinSize * cos(angle + 3.1416 / 7));
           S.y = (int) (E.y + spinSize * sin(angle + 3.1416 / 7));
-          line( Img, S, E, GREEN_2, LineSize, CV_AA, 0 );
+          //line( Img, S, E, GREEN_2, LineSize, CV_AA, 0 );
+          line( Img, S, E, RED, LineSize, CV_AA, 0 );
 
           S.x = (int) (E.x + spinSize * cos(angle - 3.1416 / 7));
           S.y = (int) (E.y + spinSize * sin(angle - 3.1416 / 7));
-          line( Img, S, E, GREEN_2, LineSize, CV_AA, 0 );
+          //line( Img, S, E, GREEN_2, LineSize, CV_AA, 0 );
+          line( Img, S, E, RED, LineSize, CV_AA, 0 );
 
       }
 
