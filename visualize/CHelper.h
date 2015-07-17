@@ -11,7 +11,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
-#include "OpenEXR/half.h"
+//#include "OpenEXR/half.h"
 #include "Defines.h"
 
 using namespace std;
@@ -38,6 +38,7 @@ void convertToCV_8UC3(Mat &Image);
 // ALT-GR + y / x
 //«««««««««««««««««««««««««««««««««««««««««««
 
+/*
 inline void reduceToHalfPrecision(Mat D)
 {
   //only prepared for double Mats!
@@ -55,6 +56,7 @@ inline void reduceToHalfPrecision(Mat D)
       D.at<double>(y, x) = double(tmp);
     }
 }
+*/
 
 //------------------------------------------------------------------
 // copy_PicYuv2Mat
