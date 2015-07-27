@@ -333,8 +333,8 @@ public:
         CB_Roi = RED;
       else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER && pcCU->isSkipped(uiAbsZorderIdx))
         CB_Roi = GREEN;
-      else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER && pcCU->getMergeFlag(uiAbsZorderIdx))
-              CB_Roi = YELLOW;
+      //else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER && pcCU->getMergeFlag(uiAbsZorderIdx))
+      //        CB_Roi = YELLOW;
       else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER)
         CB_Roi = BLUE;
       else
@@ -405,6 +405,12 @@ public:
       Point PU_Anc  = Point(RasterPartIdx % (SUnitsPerRow), RasterPartIdx / (SUnitsPerRow)) * 4 *Zoom;
       Point PU_Dims = Point(PU_Width , PU_Height ) * Zoom;
       Mat PU_Roi = CTB_Roi(Rect(PU_Anc.x, PU_Anc.y, PU_Dims.x, PU_Dims.y));
+
+      if(isMarkingBlocks)
+      {
+        if(pcCU->getPredictionMode(uiAbsZorderIdx+ruiPartAddr) == MODE_INTER && pcCU->getMergeFlag(uiAbsZorderIdx+ruiPartAddr))
+          PU_Roi = YELLOW;
+      }
 
       //----------------------------------------------------
       // DRAWING PU BORDERS
