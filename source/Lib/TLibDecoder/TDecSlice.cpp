@@ -39,7 +39,7 @@
 
 #include "../../../visualize/Defines.h"
 #include "../../../visualize/CShow_ModesAndVectors.h"
-//#include "../../../visualize/CShow_TransformUnits.h"
+#include "../../../visualize/CShow_TransformUnits.h"
 #include "../../../visualize/CShow_RefIndices.h"
 //#include "../../../visualize/CShow_BitsCostDistortion.h"
 //#include "../../../visualize/CShow_Residual.h" // don't include, will not work
@@ -392,7 +392,7 @@ Void TDecSlice::decompressSlice(TComInputBitstream** ppcSubstreams, TComPic*& rp
   cout << endl << "Processing " << NumCTBs << " CTBs:" << endl;
   
   CShow_ModesAndVectors(rpcPic, NumCTBs, VizFile, pcSlice->getSPS()->getMaxCUWidth());
-  //CShow_TransformUnits(rpcPic, NumCTBs, VizFile);
+  CShow_TransformUnits(rpcPic, NumCTBs, VizFile, pcSlice->getSPS()->getMaxCUWidth());
   CShow_RefIndices(rpcPic, NumCTBs, VizFile, pcSlice->getSPS()->getMaxCUWidth());
   //CShow_BitsCostDistortion Show_BitsCostDistortion(rpcPic, NumCTBs, VizFile);
   //int Zoom = Show_BitsCostDistortion.Zoom;

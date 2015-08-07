@@ -41,7 +41,7 @@ public:
   Point CTB_UpperLeft; //from (inclusive)
   Point CTB_LowerRight; //to (exclusive)
 
-  CShow_TransformUnits(TComPic* pcPic, int NumCTBs, char *VizFile )
+  CShow_TransformUnits(TComPic* pcPic, int NumCTBs, char *VizFile, int CTBSize )
   {
     //---------------------------------------------
     // CHANGE HERE
@@ -64,8 +64,8 @@ public:
     CTB_UpperLeft  = Point(0,0);
     CTB_LowerRight = Point(WidthInLCUs, HeightInLCUs);
     CTB_Span = CTB_LowerRight - CTB_UpperLeft;
-    ImgDim.x = (CTB_Span.x)*64*Zoom; //this is equal to 800x480 * Zoom
-    ImgDim.y = (CTB_Span.y)*64*Zoom;
+    ImgDim.x = (CTB_Span.x)*CTBSize*Zoom; //this is equal to 800x480 * Zoom
+    ImgDim.y = (CTB_Span.y)*CTBSize*Zoom;
 
 
     Img = Mat(ImgDim.y, ImgDim.x, CV_8UC3, BLACK);
@@ -93,15 +93,15 @@ public:
         continue;
 
       //CTB_Anc holds anchor (in pixels) relative to upper left corner of interest area!
-      Point CTB_Anc = (CTB_Pos - CTB_UpperLeft) * 64 * Zoom;
+      Point CTB_Anc = (CTB_Pos - CTB_UpperLeft) * CTBSize * Zoom;
       //CTB_Roi holds image ROI of the current CTB
-      Mat CTB_Roi = Img(Rect(CTB_Anc.x, CTB_Anc.y, 64*Zoom, 64*Zoom));
+      Mat CTB_Roi = Img(Rect(CTB_Anc.x, CTB_Anc.y, CTBSize*Zoom, CTBSize*Zoom));
 
       //---------------------------------------------
       // LETS DIVE INTO A RECURSION
       //---------------------------------------------
       TComDataCU* pcCU = pcPic->getCU( LCU_Index );
-      xDrawCU( pcCU, 0, 0, CTB_Roi, CTB_Anc);
+      xDrawCU( pcCU, 0, 0, CTB_Roi, CTB_Anc, CTBSize);
 
       //---------------------------------------------
       // FINALIZE: DRAW YELLOW CTB BORDER AND WRITE INDEX
@@ -126,6 +126,9 @@ public:
     Mat Blended;
     if(isBlending)
     {
+      int DIMX = pcPic->getPicYuvRec()->getWidth();
+      int DIMY = pcPic->getPicYuvRec()->getHeight();
+
       Mat Tmp;
       //helpme::copy_PicYuv2Mat(pcPic->getPicYuvOrg(), Tmp); // original not available on decoder side!
       helpme::copy_PicYuv2Mat(pcPic->getPicYuvRec(), Tmp);
@@ -137,7 +140,7 @@ public:
       Mat pointers[] = { CurFrame, CurFrame, CurFrame };
       Mat Gray;
       merge(pointers, 3, Gray);
-      Mat InterestArea = Gray(Rect(CTB_UpperLeft.x*64, CTB_UpperLeft.y*64, CTB_Span.x*64, CTB_Span.y*64));
+      Mat InterestArea = Gray(Rect(CTB_UpperLeft.x*CTBSize, CTB_UpperLeft.y*CTBSize, CTB_Span.x*CTBSize, CTB_Span.y*CTBSize));
       Mat Resized;
       cv::resize(InterestArea, Resized, Size(ImgDim.x, ImgDim.y),0,0, INTER_NEAREST);
       double alpha = 0.5;
@@ -174,7 +177,7 @@ public:
 
 
 
-  void xDrawCU( TComDataCU* pcCU, UInt uiAbsZorderIdx, UInt uiDepth, Mat &CTB_Roi, Point &CTB_Anc)
+  void xDrawCU( TComDataCU* pcCU, UInt uiAbsZorderIdx, UInt uiDepth, Mat &CTB_Roi, Point &CTB_Anc, int CTBSize)
   {
 //    if(pcCU->getPic()==0||pcCU->getPartitionSize(uiAbsZorderIdx)==SIZE_NONE)
 //    {
@@ -196,7 +199,7 @@ public:
         if(    ( uiLPelX < pcCU->getSlice()->getSPS()->getPicWidthInLumaSamples() )
             && ( uiTPelY < pcCU->getSlice()->getSPS()->getPicHeightInLumaSamples() ) )
         {
-            xDrawCU( pcCU, uiAbsZorderIdx, uiDepth+1, CTB_Roi, CTB_Anc);
+            xDrawCU( pcCU, uiAbsZorderIdx, uiDepth+1, CTB_Roi, CTB_Anc, CTBSize);
         }
       }
       return;
@@ -245,13 +248,13 @@ public:
 
     //from Zscan to Raster, then getting x and y indices
     int RasterPartIdx  = g_auiZscanToRaster[uiAbsZorderIdx];
-    Point AbsPart = Point(RasterPartIdx % (64/4), RasterPartIdx / (64/4)); // 64/4 = partition ticks (=StorageUnits-Ticks) in a LCU
+    Point AbsPart = Point(RasterPartIdx % (CTBSize/4), RasterPartIdx / (CTBSize/4)); // 64/4 = partition ticks (=StorageUnits-Ticks) in a LCU
 
     //---------------------------------------------
     // ANCHOR AND DIM INFO OF CU INSIDE THE CTU
     //---------------------------------------------
     //final pixel positions, extraction of CB roi
-    int CB_Width = 64 >> uiDepth; //width of CU in pixels
+    int CB_Width = CTBSize >> uiDepth; //width of CU in pixels
     Point CB_Anc  = Point(AbsPart.x, AbsPart.y ) * 4 * Zoom; //times 4 since one Smallest-Partition spans 4x4 pixels!
     Point CB_Dims = Point(CB_Width , CB_Width ) * Zoom;
     Mat CB_Roi = CTB_Roi(Rect(CB_Anc.x, CB_Anc.y, CB_Dims.x, CB_Dims.y));
@@ -329,7 +332,7 @@ public:
     // (see TEncEntropy::xEncodeTransform)
     // Only draw TUs if rqt_root_cbf == 1
     if(pcCU->getQtRootCbf( uiAbsZorderIdx ))
-      xDrawTU( pcCU, uiDepth, CB_Width, 0, CTB_Roi, uiAbsZorderIdx );
+      xDrawTU( pcCU, uiDepth, CB_Width, 0, CTB_Roi, uiAbsZorderIdx, CTBSize );
     
 
     //----------------------------------------------------
@@ -353,7 +356,8 @@ public:
                   UInt        TB_Width,
                   UInt        uiAbsPartIdx,     // index counted for current CB
                   Mat&        CTB_Roi,
-                  UInt        uiAbsZorderIdx    // index counted for complete CTB to BEGINNING of current CB
+                  UInt        uiAbsZorderIdx,   // index counted for complete CTB to BEGINNING of current CB
+                  int         CTBSize
                 )
     {
         const UInt uiSubdiv = pcCU->getTransformIdx( uiAbsZorderIdx + uiAbsPartIdx ) + pcCU->getDepth( uiAbsZorderIdx + uiAbsPartIdx ) > uiDepth;
@@ -371,16 +375,16 @@ public:
             const UInt partNum = pcCU->getPic()->getNumPartInCU() >> (uiDepth << 1); // = numQPart
             //printf("partNum = %u\n", partNum);
             
-            xDrawTU( pcCU, uiDepth, TB_Width >> 1, uiAbsPartIdx, CTB_Roi, uiAbsZorderIdx );
+            xDrawTU( pcCU, uiDepth, TB_Width >> 1, uiAbsPartIdx, CTB_Roi, uiAbsZorderIdx, CTBSize );
             
             uiAbsPartIdx += partNum;
-            xDrawTU( pcCU, uiDepth, TB_Width >> 1, uiAbsPartIdx, CTB_Roi, uiAbsZorderIdx );
+            xDrawTU( pcCU, uiDepth, TB_Width >> 1, uiAbsPartIdx, CTB_Roi, uiAbsZorderIdx, CTBSize );
             
             uiAbsPartIdx += partNum;
-            xDrawTU( pcCU, uiDepth, TB_Width >> 1, uiAbsPartIdx, CTB_Roi, uiAbsZorderIdx );
+            xDrawTU( pcCU, uiDepth, TB_Width >> 1, uiAbsPartIdx, CTB_Roi, uiAbsZorderIdx, CTBSize );
             
             uiAbsPartIdx += partNum;
-            xDrawTU( pcCU, uiDepth, TB_Width >> 1, uiAbsPartIdx, CTB_Roi, uiAbsZorderIdx );
+            xDrawTU( pcCU, uiDepth, TB_Width >> 1, uiAbsPartIdx, CTB_Roi, uiAbsZorderIdx, CTBSize );
         }
         else
         {
@@ -388,7 +392,7 @@ public:
             
             //from Zscan to Raster, then getting x and y indices
             int RasterPartIdx  = g_auiZscanToRaster[uiAbsZorderIdx + uiAbsPartIdx]; // from CTB beginning to CU beginning to TB beginning
-            Point AbsPart = Point(RasterPartIdx % (64/4), RasterPartIdx / (64/4)); // 64/4 = partition ticks (=StorageUnits-Ticks) in a LCU
+            Point AbsPart = Point(RasterPartIdx % (CTBSize/4), RasterPartIdx / (CTBSize/4)); // 64/4 = partition ticks (=StorageUnits-Ticks) in a LCU
             
             Point TB_Anc  = Point(AbsPart.x, AbsPart.y ) * 4 * Zoom; //times 4 since one Smallest-Partition spans 4x4 pixels!
             Point TB_Dims = Point(TB_Width , TB_Width ) * Zoom;
