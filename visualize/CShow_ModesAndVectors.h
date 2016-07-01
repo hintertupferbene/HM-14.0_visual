@@ -333,8 +333,8 @@ public:
         CB_Roi = RED;
       else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER && pcCU->isSkipped(uiAbsZorderIdx))
         CB_Roi = GREEN;
-      //else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER && pcCU->getMergeFlag(uiAbsZorderIdx))
-      //        CB_Roi = YELLOW;
+      else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER && pcCU->getMergeFlag(uiAbsZorderIdx))
+              CB_Roi = YELLOW;
       else if(pcCU->getPredictionMode(uiAbsZorderIdx) == MODE_INTER)
         CB_Roi = BLUE;
       else
@@ -410,6 +410,9 @@ public:
       {
         if(pcCU->getPredictionMode(uiAbsZorderIdx+ruiPartAddr) == MODE_INTER && pcCU->getMergeFlag(uiAbsZorderIdx+ruiPartAddr))
           PU_Roi = YELLOW;
+		// now check the harder constraint:
+		if(pcCU->getPredictionMode(uiAbsZorderIdx+ruiPartAddr) == MODE_INTER && pcCU->isSkipped(uiAbsZorderIdx+ruiPartAddr))
+			PU_Roi = GREEN;
       }
 
       //----------------------------------------------------
