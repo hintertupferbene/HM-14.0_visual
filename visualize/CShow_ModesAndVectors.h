@@ -23,6 +23,17 @@ using namespace std;
 
 #include "TLibCommon/TypeDef.h"
 
+
+#define EXPORT_QT 1
+
+#if EXPORT_QT
+#include <string>
+#include <fstream>
+#endif
+
+
+
+
 class CShow_ModesAndVectors
 {
 
@@ -87,6 +98,36 @@ public:
 
     Img = Mat(ImgDim.y, ImgDim.x, CV_8UC3, BLACK);
 
+
+#if EXPORT_QT
+    //evtl cleverer direkt sparse represantation rauszuschreiben
+    //Mat Depth_Img = Mat::zeros((CTU_Span.x)*64,(CTU_Span.y)*64,CV_8UC1);  //8 bit integer matrix with 1 channel for depth
+    //Mat* pDepth_Img = &Depth_Img;
+
+    int poc_int = pcPic->getPOC();
+
+    string poc_str;
+
+    stringstream convert; // stringstream used for the conversion
+
+    convert << poc_int; //add the value of Number to the characters in the stream
+
+    poc_str = convert.str(); //set Result to the content of the stream
+
+    string directory = "harp_output/";
+
+    string filename = "poc_" + poc_str + ".txt";
+
+    ofstream output;
+
+    output.open( (directory + filename).c_str() , ios::out);
+
+    //output << pcPic->getFrameWidthInCU() << endl;
+    //output << pcPic->getFrameHeightInCU() << endl;
+
+#endif
+
+
     //---------------------------------------------
     //---------------------------------------------
     //---------------------------------------------
@@ -117,7 +158,12 @@ public:
       // LETS DIVE INTO A RECURSION
       //---------------------------------------------
       TComDataCU* pcCU = pcPic->getCU( LCU_Index );
+
+#if EXPORT_QT
+      xDrawCU( pcCU, 0, 0, CTB_Roi, CTB_Anc, CTBSize, output);
+#else
       xDrawCU( pcCU, 0, 0, CTB_Roi, CTB_Anc, CTBSize);
+#endif
 
       //---------------------------------------------
       // FINALIZE: DRAW YELLOW CTB BORDER AND WRITE INDEX
@@ -233,11 +279,18 @@ public:
 
     cout << string(textlen, '=') << endl; //==================
     call++;
+
+#if EXPORT_QT
+    output.close();
+#endif
   };
 
 
-
+#if EXPORT_QT
+  void xDrawCU( TComDataCU* pcCU, UInt uiAbsZorderIdx, UInt uiDepth, Mat &CTB_Roi, Point &CTB_Anc, int CTBSize, ofstream& output)
+#else
   void xDrawCU( TComDataCU* pcCU, UInt uiAbsZorderIdx, UInt uiDepth, Mat &CTB_Roi, Point &CTB_Anc, int CTBSize)
+#endif
   {
 //    if(pcCU->getPic()==0||pcCU->getPartitionSize(uiAbsZorderIdx)==SIZE_NONE)
 //    {
@@ -259,7 +312,11 @@ public:
         if(    ( uiLPelX < pcCU->getSlice()->getSPS()->getPicWidthInLumaSamples() )
             && ( uiTPelY < pcCU->getSlice()->getSPS()->getPicHeightInLumaSamples() ) )
         {
+#if EXPORT_QT
+            xDrawCU( pcCU, uiAbsZorderIdx, uiDepth+1, CTB_Roi, CTB_Anc, CTBSize, output);
+#else
             xDrawCU( pcCU, uiAbsZorderIdx, uiDepth+1, CTB_Roi, CTB_Anc, CTBSize);
+#endif
         }
       }
       return;
@@ -340,6 +397,116 @@ public:
       else
         CB_Roi = GRAY; //used for outer bounds CB's
     }
+
+
+#if EXPORT_QT
+
+
+      if (output.is_open()) {
+/*
+        int res_x = 416;
+        int res_y = 240;
+
+        int x_CU_ul = CU.Pos.x;
+        int y_CU_ul = CU.Pos.y;
+        int depth_CU = CU.Depth;
+        int width_CU = CU.Width;
+
+        if (depth_CU == 0) {
+
+          output << pcCU->getAddr() << " ";
+          output << x_CU_ul << " ";
+          output << y_CU_ul << " ";
+          output << width_CU << " ";
+          output << endl;
+
+        } else if (depth_CU == 1 || depth_CU == 2) {
+
+          if()
+
+
+
+
+          //int row_CU_ur = CU.Pos.x + width_CU - 1;
+          int x_CU_ur = CU.Pos.x + width_CU;
+          int y_CU_ur = CU.Pos.y;
+
+          int x_CU_ll = CU.Pos.x;
+          int y_CU_ll = CU.Pos.y + width_CU;
+
+          int x_CU_lr = CU.Pos.x + width_CU;
+          int y_CU_lr = CU.Pos.y + width_CU;
+
+          //upper left
+          output << pcCU->getAddr() << " ";
+          output << x_CU_ul << " ";
+          output << y_CU_ul << " ";
+          output << width_CU << " ";
+          output << endl;
+
+          //upper right
+          if (x_CU_ur < res_x) {
+            output << pcCU->getAddr() << " ";
+            output << x_CU_ur << " ";
+            output << y_CU_ur << " ";
+            output << width_CU << " ";
+            output << endl;
+          }
+
+          //lower right
+          if (x_CU_lr < res_x && y_CU_lr < res_y) {
+            output << pcCU->getAddr() << " ";
+            output << x_CU_lr << " ";
+            output << y_CU_lr << " ";
+            output << width_CU << " ";
+            output << endl;
+          }
+
+          //lower left
+          if (y_CU_ll < res_y){
+            output << pcCU->getAddr() << " ";
+          output << x_CU_ll << " ";
+          output << y_CU_ll << " ";
+          output << width_CU << " ";
+          output << endl;
+
+          }
+
+          //        } else {
+          //cerr << "Error in CShow_Predictionunits.h" << endl;
+          //exit(1);
+//        }
+
+
+
+*/
+
+            UInt uiLPelX   = pcCU->getCUPelX() + g_auiRasterToPelX[ g_auiZscanToRaster[uiAbsZorderIdx] ];
+            UInt uiTPelY   = pcCU->getCUPelY() + g_auiRasterToPelY[ g_auiZscanToRaster[uiAbsZorderIdx] ];
+
+            if(    ( uiLPelX < pcCU->getSlice()->getSPS()->getPicWidthInLumaSamples() )
+                && ( uiTPelY < pcCU->getSlice()->getSPS()->getPicHeightInLumaSamples() ) )
+            {
+          //int width_CU = CU.Width;
+          int width_CU = CB_Width;
+
+          output << pcCU->getAddr() << " ";
+          output << uiLPelX << " ";
+          output << uiTPelY << " ";
+          output << width_CU << " ";
+          output << endl;
+            }
+
+      } else {
+        cerr
+            << "Error opening file for writing depth (sparse representation)!";
+        exit(1);
+      }
+
+#endif
+
+
+
 
     //---------------------------------------------
     // DRAWING STORAGE-UNITS GRID
