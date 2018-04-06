@@ -42,8 +42,11 @@ set exe_string = "bin/TAppEncoderStatic -c "$enc_conf_file" -i "$input_file" -b 
 echo "Executing: "$exe_string
 $exe_string
 
+#create output folder for images...
+mkdir -p jpg
+# ...and clean it if necessary
 rm jpg/*.jpg
 
-#bin/TAppDecoderStatic -b $bitstream # -o rec_dec.yuv
-bin/TAppDecoderStatic_visu -b $bitstream # -o rec_dec.yuv
+bin/TAppDecoderStatic -b $bitstream # -o rec_dec.yuv
+#bin/TAppDecoderStatic_visu -b $bitstream # -o rec_dec.yuv
 
