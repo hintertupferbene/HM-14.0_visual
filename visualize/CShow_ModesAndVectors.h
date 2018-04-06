@@ -24,7 +24,7 @@ using namespace std;
 #include "TLibCommon/TypeDef.h"
 
 
-#define EXPORT_QT 1
+#define EXPORT_QT 0
 
 #if EXPORT_QT
 #include <string>
